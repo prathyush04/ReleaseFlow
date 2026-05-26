@@ -1,0 +1,6 @@
+backend/target/
+backend/maven.zip
+backend/apache-maven-3.9.6/
+*.log
+.env
+.DS_Store
