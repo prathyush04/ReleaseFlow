@@ -13,6 +13,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.http.ResponseEntity;
 
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.CacheEvict;
+
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -33,9 +37,18 @@ public class DeploymentService {
     @Autowired
     private AuditService auditService;
 
+    @Autowired
+    private CacheManager cacheManager;
+
+    @CacheEvict(value = "deployments", key = "#request.releaseId")
     public Deployment triggerDeployment(DeploymentRequest request, String username, boolean isRollback) {
         User user = userRepository.findByUsername(username).orElseThrow();
         Release release = releaseRepository.findById(request.getReleaseId()).orElseThrow();
+
+        // Evict dashboard stats for this project
+        if (cacheManager.getCache("dashboardStats") != null) {
+            cacheManager.getCache("dashboardStats").evict(release.getProject().getId());
+        }
 
         Deployment deployment = new Deployment();
         deployment.setRelease(release);
@@ -80,6 +93,7 @@ public class DeploymentService {
         return saved;
     }
 
+    @Cacheable(value = "deployments", key = "#releaseId")
     public List<Deployment> getDeploymentsByRelease(Long releaseId) {
         return deploymentRepository.findByReleaseId(releaseId);
     }

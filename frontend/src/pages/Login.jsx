@@ -29,6 +29,25 @@ const Login = () => {
         
         {error && <div className="badge badge-danger" style={{ marginBottom: '1rem', display: 'block' }}>{error}</div>}
         
+        <div className="form-group" style={{ textAlign: 'left', marginBottom: '1.5rem' }}>
+          <label className="form-label" style={{ color: 'var(--text-secondary)' }}>Quick Login (Testing)</label>
+          <select 
+            className="form-input" 
+            style={{ cursor: 'pointer', backgroundColor: 'rgba(255, 255, 255, 0.05)' }}
+            onChange={(e) => {
+              if (e.target.value === 'admin') { setUsername('admin'); setPassword('password123'); }
+              else if (e.target.value === 'manager') { setUsername('sarah_mgr'); setPassword('password123'); }
+              else if (e.target.value === 'developer') { setUsername('john_dev'); setPassword('password123'); }
+              else { setUsername(''); setPassword(''); }
+            }}
+          >
+            <option value="">-- Select a test account --</option>
+            <option value="admin">Administrator</option>
+            <option value="manager">Release Manager</option>
+            <option value="developer">Developer</option>
+          </select>
+        </div>
+
         <form onSubmit={handleLogin}>
           <div className="form-group" style={{ textAlign: 'left' }}>
             <label className="form-label"><User size={16} style={{ display: 'inline', marginRight: '0.5rem', verticalAlign: 'text-bottom' }}/>Username</label>

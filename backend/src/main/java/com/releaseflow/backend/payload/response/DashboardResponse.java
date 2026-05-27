@@ -1,8 +1,10 @@
 package com.releaseflow.backend.payload.response;
 
-public class DashboardResponse {
+public class DashboardResponse implements java.io.Serializable {
     private long releases;
     private long deployments;
+
+    public DashboardResponse() {}
 
     public DashboardResponse(long releases, long deployments) {
         this.releases = releases;

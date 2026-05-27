@@ -90,7 +90,11 @@ const Deployments = () => {
       setTimeout(() => fetchDeployments(selectedReleaseId), 5000);
     } catch (error) {
       console.error('Error triggering deployment', error);
-      alert('Failed to trigger deployment');
+      if (error.response && error.response.status === 403) {
+        alert('You are not authorized to trigger deployments. Only Admins and Release Managers can perform this action.');
+      } else {
+        alert('Failed to trigger deployment');
+      }
     } finally {
       setSubmitting(false);
     }
