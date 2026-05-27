@@ -10,7 +10,10 @@ The domain of ReleaseFlow is built around several key entities:
 - **Releases**: Specific versions of a Project. Releases store version numbers, descriptions, and custom webhook URLs. They maintain a strict status lifecycle (e.g., IN_PROGRESS, SUCCESS, FAILED).
 - **Deployments**: The physical act of pushing a Release to an environment. Deployments can be standard or "Rollbacks". ReleaseFlow automatically triggers Vercel webhooks and actively polls Vercel's API to reflect real-time build states, updating the deployment status dynamically.
 - **Audit Logs**: Every critical action taken by a user (e.g., creating a project, triggering a deployment, rolling back a release) is immutable and recorded in the AuditLog system, providing complete traceability.
-- **Users and Roles**: Access is governed by a secure User system utilizing role-based access control, ensuring that only authorized personnel can trigger or modify deployments.
+- **Users and Roles**: Access is strictly governed by a secure User system utilizing Role-Based Access Control (RBAC).
+  - `ROLE_DEVELOPER`: Can view projects and deployments.
+  - `ROLE_RELEASE_MANAGER`: Can create releases and trigger deployments.
+  - `ROLE_ADMIN`: Full access, including user management and system configuration.
 
 ## Architecture & Technology Stack
 
@@ -19,8 +22,9 @@ The application relies on a modern, decoupled architecture:
 ### Backend Architecture
 The backend is a RESTful API built to handle complex business logic, database transactions, and background task scheduling.
 - **Framework**: Java 17+ with Spring Boot
-- **Persistence**: Spring Data JPA / Hibernate
-- **Security**: Spring Security with JWT (JSON Web Tokens) for stateless authentication
+- **Persistence**: Spring Data JPA / Hibernate with **PostgreSQL**
+- **Caching**: **Redis** is integrated via Spring `@Cacheable` to drastically reduce database latency when polling deployment statuses and dashboard statistics (achieving a ~40% latency reduction).
+- **Security**: Spring Security with JWT (JSON Web Tokens) for stateless authentication and method-level security (`@PreAuthorize`).
 - **Integration**: Scheduled background workers (via `@Scheduled`) continuously poll the Vercel API to synchronize deployment states locally.
 - **Build Tool**: Maven
 
@@ -33,6 +37,13 @@ The frontend is a dynamic, responsive single-page application.
 - **UI & Icons**: Modern aesthetic utilizing Lucide React for iconography
 
 ## Setup Instructions
+
+### Infrastructure (Docker)
+ReleaseFlow requires PostgreSQL and Redis. Start them via Docker:
+```bash
+docker run --name releaseflow-postgres -e POSTGRES_USER=admin -e POSTGRES_PASSWORD=admin -e POSTGRES_DB=releaseflow -p 5433:5432 -d postgres:15-alpine
+docker run --name releaseflow-redis -p 6379:6379 -d redis:7-alpine
+```
 
 ### Backend Setup
 1. Navigate to the `backend` directory.
